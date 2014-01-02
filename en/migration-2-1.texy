@@ -126,7 +126,7 @@ Database (NDB)
 
 Are you using Nette Database Table (NDBT), a great part of the NDB to which is accessed via `$database->table(...)`?
 
-- method `table()` was moved from `Connection` to new class `Nette\Database\Context`. It "contains":http://api.nette.org/2.1.0/Nette.Database.Context.html all of the important methods for working with databases, so feel free to change the `Connection` for `Context` and you're done.
+- methof `table()` was moved from `Connection` to new class `Nette\Database\Context`. It "containes":http://api.nette.org/2.1.0/Nette.Database.Context.html all of the important methods for working with databases, so feel free to change the `Connection` for `Context` and you're done.
 - properties of `ActiveRow` are now read-only, for updating use `$row->update(array('field' => 'value'))`. The old behavior had so many difficulties, sorry.
 - backjoin syntax was changed from `book_tag:tag.name` to `:book_tag.tag.name` (see semicolons)
 - instead of second argument `$having` in method `group()` use method `having()`
@@ -137,8 +137,9 @@ Dependency Injection (DI)
 -------------------------
 
 - class `Nette\Config\Configurator` -> `Nette\Configurator`
-- in configuration file was merged definition of `factories` a `services` in common `services`. Append key `autowired: no` to the factories.
-- introduced "bullet" syntax for anonymous services:
+- v konfiguračním souboru se sloučily definice `factories` a `services` do společného `services`. Jen těm, co byly původně factories, přidejte klíč `autowired: no`.
+- in configuration file was merged definition of factories a services in common `services`. Append key `autowired: no` to the factories.
+- introduced "buller" syntax for anonymous services:
 
 /--code neon
 services:
@@ -148,9 +149,9 @@ services:
 \--
 
 Work directly with the DI container is usually not a good idea, but if you do so:
-- factory method call as `$container->createService('name')` instead of `$container->createServiceName()`
+- factory method call as `$container->createService('name')` instead of `$container->createName()`
 - all default factories are deprecated: `createLatte()`, `createCache()`, `createMail()` a `createBasicForm()`
-- access to services via `$container->getService()` or `getByType()` instead of `$container->serviceName`
+- access to services via `$container->getService()` or `getByType()` instead of `$container->nazevSluzby`
 - Container: removed property `$classes`, removed parameter `$meta` in method `addService()`
 - ServiceDefinition: removed property `$internal` and method `setInternal()`
 - ContainerBuilder: method `generateClass()` is deprecated, use `generateClasses()[0]` instead
@@ -168,75 +169,75 @@ If you are using old `Environment`, it will require to set constant `TEMP_DIR`.
 
 Application & Presenter
 -----------------------
-- Presenter prevents passing of array to scalar persistent parameters. If you need `array` set it as default value
-- deprecated methods `getService()` (use `getContext()->getService()`), `getHttpContext()` and `getApplication()`
-- magical `getParameter(NULL)` -> `getParameters()`
-- instead of weird `invalidateControl()`, `redrawControl()` can be used
+- Presenter now avoids injecting an array to a persistent parameter. However, if array is what you want, set it as default value,
+- deperecated methods `getService()` (use `getContext()->getService()` instead), `getHttpContext()` and `getApplication()`
+- magic `getParameter(NULL)` -> `getParameters()`
+- instead of strange `invalidateControl()` you can use `redrawControl()`
 - Application: methods `storeRequest()` and `restoreRequest()` are deprecated, call them on `UI\Presenter` instead
 - Application\Routers\Route: foo-parameters are not optional when pattern is missing
 
 
 Latte
 -----
-- default mode is HTML (instead of XHTML), what can be set "in configuration":http://doc.nette.org/cs/2.1/configuring#toc-sablony
-- automatically "quotes" attributes in `<a title={$title}>`. It should be without any complications, but for sure
-- attribute `n:input` is changed to `n:name` and can be used also in label, select, form and textarea, not only in `<input>`
-- deprecated macro `{attr}` (use `n:attr`) and `{assign}` changed to `{var}`
-- it's now best practise to use `{$var|noescape}` instead of old "exclamation mark" notation `{!$var}`, it's more clearer
-- for those who were using `{#block}` in dev version, it was confusing so it didn't make it's way to 2.1
+- default content type is HTML (instead of XHTML), you can switch this back "in configuration":http://doc.nette.org/en/2.1/configuring (`nette: xhtml: true`)
+- automaticlaly quotes attributes in `<a title={$title}>` (it shouldn't cause any problems)
+- attribute `n:input` has changed to `n:name` so it can be used not only on `<input>`, but also on label, select, form and textarea
+- deprecated macros `{attr}` (replaced by `n:attr`) and `{assign}` -> `{var}`
+- instead of exclamation mark notation `{!$var}` it is recommended to use `{$var|noescape}` it's more obvious
+- the short block notation `{#block}` you may have used in dev-version didn't get it to 2.1 - it wasn't comprehensible
 - native support for empty macros, use for example `{label foo /}` instead of `{label foo}`
 
-There's new feature in Latte which automatically detects if `<a href={$url}>` doesn't contain something like `javascript:hackThisWeb()`. Only http, https, ftp and mailto protocols are allowed (plus relative paths of course). Attributes like src, action, formaction and `<object data=...>` are checked too. If you want to print URL without control, use `|nosafeurl` modifier.
+ther is a new feature in Latte which in `<a href={$url}>` checks `$url` for something like `javascript:hackTheWeb()`. Allowed protocols are only http, https, ftp, mailto and of course relative paths. It checks also attributes src, action, formaction and `<object data=...>`. If you need to skip this check somewhere, use the `|nosafeurl` modifier.
 
-And there's small change related to manual checkbox rendering. See bellow.
+A minor change related to manual rendering of checkboxes is mentioned later.
 
 
 Forms
------
-Checkboxes and RadioLists are rendered as `<label><input>...</label>` instead of `<label>...</label><input>`. And because of it, `getLabel()` and `{label}` returns nothing and `getControl()` and `{input}` return HTML in new way. If you need old behavior, please switch to "partial rendering" using colon: `{label elementName:}` or `{input elementName:}`. Easy as a pie.
+---------
+Checkboxes and RadioLists are now rendered in a more practical format `<label><input>...</label>` instead of `<label>...</label><input>`. As a result `getLabel()` method or `{label}` returns nothing and `getControl()` or `{input}` returns HTML in the new format. If you need the old behavior switch to the partial rendering mode by adding a colon: `{label nazevprvku:}` a `{input nameofcontrol:}`. Easy.
 
-Macro `{control form}` prints error messages together with element, only unassigned message are printed above the form. You should do the same also if the manual rendering is used, "for example":https://github.com/nette/sandbox/blob/f1819483da6467af1706fbc6b5679aa2f79aa8d0/app/templates/components/form.latte.
+Macro `{control form}` now always renders error messages for individual controls beside them and only the unattached ones above the form. When rendering manually it is recommended to do it the same way, "for example like this":https://github.com/nette/sandbox/blob/f1819483da6467af1706fbc6b5679aa2f79aa8d0/app/templates/components/form.latte.
 
-- `setValue()` control value and throws exception if something is wrong
-- validation rules like `Form::INTEGER`, `NUMERIC` and `FLOAT` converts value to integer and float
-- TextArea: removed default values of attributes `cols` a `rows` (they were required by old HTML4)
-- elements marked through `setDisabled()` won't be in `$form->getValues()` (browser doesn't send them)
-- deprecated `SelectBox::setPrompt(TRUE)`, use string instead of TRUE
+- `setValue()` on colntrols checks the value and throws an exception in case of error instead of former silence
+- validation rules like `Form::INTEGER`, `NUMERIC` and `FLOAT` convert its value to integer, respectively float
+- TextArea: removed default values of `cols` and `rows` attributes (they existed only because HTML4 required them)
+- fields marked by `setDisabled()` don't show up in `$form->getValues()` (browser doesn't even send the values)
+- deprecated `SelectBox::setPrompt(TRUE)`, instead of TRUE use a string
 - renamed `MultiSelectBox::getSelectedItem()` -> `getSelectedItems()`
-- JSON is used in `data-nette-rules` HTML attributes, so `netteForms.js` has to be updated to latest version
+- JSON is used in HTML attributes `data-nette-rules`, so don't forget to use current `netteForms.js`
 - Form: removed deprecated event `$onInvalidSubmit`, use `$onError` instead
 - RadioList: calling `getValue(TRUE)` is deprecated, use `getRawValue()` instead
 
 Debugger
 ---------
 - `Nette\Diagnostics\Debugger::$blueScreen` -> `Debugger::getBlueScreen()`
-- and similar `$bar` -> `getBar()`, `$logger` -> `getLogger()` a `$fireLogger` -> `getFireLogger()`
-- deprecated `Nette\Diagnostics\Debugger::tryError()`, `catchError()` and also `toStringException()`, simply use `trigger_error()` instead
-- deprecated internal `Nette\Diagnostics\Helpers::clickableDump()` a `htmlDump()`, which were replaced by `Dumper`
+- and accordingly `$bar` -> `getBar()`, `$logger` -> `getLogger()` and `$fireLogger` -> `getFireLogger()`
+- deprecated `Nette\Diagnostics\Debugger::tryError()`, `catchError()` a also `toStringException()`, instead of which use simple `trigger_error()`
+- deprecated internal `Nette\Diagnostics\Helpers::clickableDump()` and `htmlDump()`, they are replaced by a new class `Dumper`
 
 
 Mail
 ----
-- Deprecated method `Nette\Mail\Message::send()`, use mailer, see "documentation":http://doc.nette.org/cs/2.1/mailing.
+- Deprecated method `Nette\Mail\Message::send()`, use mailer, see "the documentation":http://doc.nette.org/en/2.1/mailing.
 - Mail\Message: methods `setHtmlBody()` and `setBody()` render template immediately
 - MimePart: removed method `generateMessage()`, use `getEncodedMessage()` instead
 
 
-other changes
--------------
-- Nette Framework dropped support of PHP 5.2, `migration-53.php` should help you with update to namespaces
-- minimized version is generated in "PHAR format":http://www.php.net/manual/en/book.phar.php, also in distribution there's `nette.phar` instead of `nette.min.php`. Result is the same.
-- `Nette\Utils\Finder::find($mask)` filters also directories (not only files)
-- `Nette\Security\User` accepts authenticator. Be aware of cyclic dependencies
-- usage of `mb_internal_encoding()` instead of `iconv_set_encoding()` in loader
+misc.
+-------
+- Nette Framework abandons PHP 5.2, `migration-53.php` tool will help you with migration to namespaces
+- minified version is now in "PHAR format":http://www.php.net/manual/en/book.phar.php, so instead of `nette.min.php` you will find `nette.phar` in distribution, however it can be used the same way
+- `Nette\Utils\Finder::find($mask)` filters by the mask not only files, but also directories
+- `Nette\Security\User` requires authenticator in constructor, watch out circular dependencies
+- loader does no more set `iconv_set_encoding()` and `mb_internal_encoding()`
 - deprecated constants `NETTE, NETTE_DIR a NETTE_VERSION_ID`
 - and class `Nette\Loaders\AutoLoader`
 - and variable `Nette\Framework::$iAmUsingBadHost`
-- is highly recommended to not use `callback()` and class `Nette\Callback`, because global functions can cause some "problems":https://github.com/nette/nette/issues/1187
-- namespace was renamed from `Nette\Utils\PhpGenerator` -> `Nette\PhpGenerator`
-- Nette will warn you „Possible problem: you are sending a cookie while already having some data in output buffer,“ if you want to send HTTP header or cookie and have some data in output buffer. Buffer can overflow.
+- it is recommended not to use `callback()` and class `Nette\Callback` - global functions can cause "complications":https://github.com/nette/nette/issues/1187
+- renamed namespace `Nette\Utils\PhpGenerator` -> `Nette\PhpGenerator`
+- Nette warns you with message „Possible problem: you are sending a cookie while already having some data in output buffer,“ if you try to send HTTP header or cookie and an output has already been sent, even just to buffer. It's because the buffer can overflow.
 - InstanceFilter: removed entirely
-- RecursiveFilter: removed method `accept()` and parameter `$childrenCallback` in constructor
+- ResursiveFilter: removed method `accept()` and parameter `$childrenCallback` in constructor
 - RequestFactory: removed method `setEncoding()`, only UTF-8 and binary (via `setBinary()`) is now supported
 - ObjectMixin: removed method `callProperty()`
 - ObjectMixin: removes support for non-registered extension methods (`*_prototype_*` functions)
